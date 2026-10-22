@@ -1,0 +1,93 @@
+{
+  "name": "callcanvas",
+  "version": "1.0.0",
+  "description": "CallCanvas — visual API reporting for Playwright. Every API call. One clear view: sanitized request/response pages inside the native Playwright report, one self-contained page per test.",
+  "license": "MIT",
+  "author": "Ahmed Salah (https://github.com/iamsalaheldin)",
+  "homepage": "https://github.com/iamsalaheldin/CallCanvas#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamsalaheldin/CallCanvas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iamsalaheldin/CallCanvas/issues"
+  },
+  "keywords": [
+    "callcanvas",
+    "playwright",
+    "playwright-test",
+    "api",
+    "api-testing",
+    "api-report",
+    "report",
+    "reporter",
+    "html-report",
+    "request",
+    "response",
+    "sanitize",
+    "redact",
+    "testing",
+    "qa"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "commonjs",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./fixtures": {
+      "import": {
+        "types": "./dist/esm/fixtures.d.ts",
+        "default": "./dist/esm/fixtures.js"
+      },
+      "require": {
+        "types": "./dist/cjs/fixtures.d.ts",
+        "default": "./dist/cjs/fixtures.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node scripts/write-dist-stubs.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "playwright test",
+    "test:report": "playwright show-report",
+    "smoke:pack": "node scripts/smoke-pack.mjs",
+    "verify": "npm run typecheck && npm run build && npm test && npm run smoke:pack",
+    "prepack": "npm run build",
+    "prepublishOnly": "node scripts/release-check.mjs && npm run verify",
+    "release:check": "node scripts/release-check.mjs"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "~1.58.2",
+    "@types/node": "^20.19.0",
+    "typescript": "^5.6.0"
+  }
+}

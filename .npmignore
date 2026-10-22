@@ -1,0 +1,10 @@
+# `files` in package.json is the allow-list; this file only keeps the tarball honest if it ever changes.
+test/
+examples/
+scripts/
+test-results/
+playwright-report/
+tsconfig*.json
+playwright.config.ts
+docs/
+.github/

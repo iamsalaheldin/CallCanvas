@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Node ${{ matrix.node }} · Playwright ${{ matrix.playwright }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest supported Playwright and the versions between it and current, on the LTS Node.
+          - { node: 20, playwright: '1.40.1' }
+          - { node: 20, playwright: '1.45.3' }
+          - { node: 20, playwright: '1.50.1' }
+          - { node: 20, playwright: 'latest' }
+          # Node floor and ceiling on the current Playwright.
+          - { node: 18, playwright: 'latest' }
+          - { node: 22, playwright: 'latest' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Pin the Playwright version under test
+        if: matrix.playwright != 'latest'
+        run: npm install --no-save "@playwright/test@${{ matrix.playwright }}"
+      - run: npx playwright --version
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+      - name: Pack and consume from CommonJS and ESM projects
+        run: npm run smoke:pack
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-node${{ matrix.node }}-pw${{ matrix.playwright }}
+          path: playwright-report
+          retention-days: 7
