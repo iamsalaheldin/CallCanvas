@@ -42,7 +42,7 @@ jobs:
         run: npm run smoke:pack
       - name: Keep the report of a failed run
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-node${{ matrix.node }}-pw${{ matrix.playwright }}
           path: playwright-report
