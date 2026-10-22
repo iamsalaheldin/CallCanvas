@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+<title>API calls — checkout flow</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1d2433;--muted:#6b7280;--border:#e3e6ea;--accent:#2563eb;--code:#f1f3f6;
+--get:#2563eb;--post:#16a34a;--put:#d97706;--patch:#7c3aed;--delete:#dc2626;--head:#64748b;--options:#64748b;
+--s1:#64748b;--s2:#16a34a;--s3:#0891b2;--s4:#d97706;--s5:#dc2626;--k:#7c3aed;--s:#0f766e;--n:#b45309;--b:#2563eb}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--text:#e6e8ee;--muted:#9aa3b2;--border:#2a2f3a;--accent:#60a5fa;--code:#0b0d12;
+--k:#c4b5fd;--s:#5eead4;--n:#fbbf24;--b:#93c5fd}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:16px}
+code,pre,table{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.hero{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row.meta{margin-top:10px}
+.method{font-weight:700;letter-spacing:.04em;color:#fff;background:var(--head);border-radius:6px;padding:4px 10px;font-size:12px}
+.method.get{background:var(--get)}.method.post{background:var(--post)}.method.put{background:var(--put)}.method.patch{background:var(--patch)}.method.delete{background:var(--delete)}
+.url{word-break:break-all;font-size:13.5px}
+.status{font-weight:700;border-radius:6px;padding:3px 10px;color:#fff;background:var(--s1)}
+.status.s2{background:var(--s2)}.status.s3{background:var(--s3)}.status.s4{background:var(--s4)}.status.s5,.status.s-error{background:var(--s5)}
+.chip{border:1px solid var(--border);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--text);background:var(--bg)}.chip.dim{color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}@media(min-width:1100px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0 0 12px;min-width:0;border-top:3px solid var(--accent)}
+.card.s2{border-top-color:var(--s2)}.card.s3{border-top-color:var(--s3)}.card.s4{border-top-color:var(--s4)}.card.s5,.card.s-error{border-top-color:var(--s5)}
+.card h2{font-size:15px;margin:0;padding:12px 16px 0}.card h2 .sub{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:8px}
+.tabs{display:flex;flex-wrap:wrap;padding:8px 16px 0;border-bottom:1px solid var(--border);margin:0 0 10px}
+.tabs input{position:absolute;opacity:0;width:0;height:0}
+.tabs label{cursor:pointer;padding:8px 12px;margin-bottom:-1px;border-bottom:2px solid transparent;color:var(--muted);font-weight:600;font-size:13px;user-select:none}
+.tabs label small{margin-left:6px;font-weight:500;color:var(--muted);background:var(--code);border-radius:999px;padding:1px 7px;font-size:11px}
+.tabs label:hover{color:var(--text)}
+.panel{display:none;flex-basis:100%;padding:10px 0 0;border-top:1px solid var(--border);margin-top:-1px}
+.scroll{max-height:70vh;overflow:auto;margin:0 16px;background:var(--code);border:1px solid var(--border);border-radius:8px}
+pre.scroll{padding:12px;white-space:pre-wrap;word-break:break-word}
+.body-meta{color:var(--muted);font-size:12px;margin:0 16px 6px}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--border);word-break:break-all}
+th{color:var(--muted);font-weight:600;white-space:nowrap;width:1%}tr:last-child th,tr:last-child td{border-bottom:0}
+.empty,.note{color:var(--muted);margin:4px 16px;font-size:13px}.note{font-style:italic}
+.error{padding:8px 0 0}.error-name{color:var(--s5);font-weight:700;margin:0 16px 8px}
+.k{color:var(--k)}.s{color:var(--s)}.n{color:var(--n)}.b{color:var(--b)}
+.hero h1{font-size:18px;margin:0 0 4px;font-weight:650}.hero .sub{color:var(--muted);font-size:12.5px}
+.chip.good{color:var(--s2);border-color:var(--s2)}.chip.bad{color:var(--s5);border-color:var(--s5)}
+.index{padding-bottom:12px;margin-bottom:14px}.index .scroll{max-height:40vh}.index td.num{text-align:right;white-space:nowrap}.index td a{color:var(--accent);text-decoration:none}
+details.call{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+details.call>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px}
+details.call>summary::-webkit-details-marker{display:none}details.call>summary::before{content:'▸';color:var(--muted);width:10px}details.call[open]>summary::before{content:'▾'}
+details.call .seq{color:var(--muted);font-weight:600;min-width:2.5em}details.call .path{word-break:break-all}
+details.call .call-body{padding:0 14px 14px}details.call .call-body>.row{margin:0 0 10px}details.call .status{font-size:12px;padding:2px 8px}
+footer{color:var(--muted);font-size:12px;margin-top:14px;display:flex;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>checkout flow</h1>
+  <div class="sub">api-tests · checkout.spec.ts</div>
+  <div class="row meta">
+    <span class="chip">2 API calls</span>
+    <span class="chip bad">1 failed</span>
+    <span class="chip">⏱ 30013 ms in requests</span>
+  </div>
+</header>
+<section class="card index">
+  <h2>Calls</h2>
+  <div class="scroll"><table><tr>
+<td><a href="#call-1">#1</a></td>
+<td><span class="method post">POST</span></td>
+<td><code>/a</code></td>
+<td><span class="status s3">302</span></td>
+<td class="num">12 ms</td>
+</tr>
+<tr>
+<td><a href="#call-3">#3</a></td>
+<td><span class="method get">GET</span></td>
+<td><code>/slow</code></td>
+<td><span class="status s-error">✖ TimeoutError</span></td>
+<td class="num">30001 ms</td>
+</tr></table></div>
+</section>
+<details class="call" id="call-1" open>
+<summary>
+  <span class="seq">#1</span>
+  <span class="method post">POST</span>
+  <code class="path">/a</code>
+  <span class="status s3">302</span>
+  <span class="chip">⏱ 12 ms</span>
+  
+</summary>
+<div class="call-body">
+  <div class="row"><code class="url">https://host.test/a?x=&lt;script&gt;</code><span class="chip dim">2026-10-22T00:00:00.000Z</span><span class="chip dim">orders-api</span></div>
+  <main class="grid">
+<section class="card ">
+  <h2>Request</h2>
+  <style>#c1-req-body:checked ~ #panel-c1-req-body{display:block}#c1-req-body:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c1-req-headers:checked ~ #panel-c1-req-headers{display:block}#c1-req-headers:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c1-req-params:checked ~ #panel-c1-req-params{display:block}#c1-req-params:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c1-req-options:checked ~ #panel-c1-req-options{display:block}#c1-req-options:checked + label{color:var(--accent);border-bottom-color:var(--accent)}</style>
+  <div class="tabs">
+    <input type="radio" name="c1-req" id="c1-req-body" checked><label for="c1-req-body">Body<small>json</small></label>
+    <input type="radio" name="c1-req" id="c1-req-headers"><label for="c1-req-headers">Headers<small>2</small></label>
+    <input type="radio" name="c1-req" id="c1-req-params"><label for="c1-req-params">Params<small>1</small></label>
+    <input type="radio" name="c1-req" id="c1-req-options"><label for="c1-req-options">Options<small>1</small></label>
+    <div class="panel" id="panel-c1-req-body"><div class="body-meta">application/json · 10 bytes</div><pre class="scroll json">{
+  <span class="k">&quot;a&quot;</span>: <span class="s">&quot;&lt;b&gt;&quot;</span>,
+  <span class="k">&quot;n&quot;</span>: <span class="n">-1.5e3</span>,
+  <span class="k">&quot;t&quot;</span>: <span class="b">true</span>,
+  <span class="k">&quot;z&quot;</span>: <span class="b">null</span>
+}</pre></div>
+    <div class="panel" id="panel-c1-req-headers"><div class="scroll"><table>
+<tr><th>&lt;h&gt;</th><td>&quot;v&quot;</td></tr>
+<tr><th>Accept</th><td>application/json</td></tr>
+</table></div></div>
+    <div class="panel" id="panel-c1-req-params"><div class="scroll"><table>
+<tr><th>x</th><td>&lt;script&gt;</td></tr>
+</table></div></div>
+    <div class="panel" id="panel-c1-req-options"><div class="scroll"><table>
+<tr><th>timeout</th><td>1</td></tr>
+</table></div></div>
+  </div>
+</section>
+<section class="card s3">
+  <h2>Response</h2>
+  <style>#c1-res-body:checked ~ #panel-c1-res-body{display:block}#c1-res-body:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c1-res-headers:checked ~ #panel-c1-res-headers{display:block}#c1-res-headers:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c1-res-info:checked ~ #panel-c1-res-info{display:block}#c1-res-info:checked + label{color:var(--accent);border-bottom-color:var(--accent)}</style>
+  <div class="tabs">
+    <input type="radio" name="c1-res" id="c1-res-body" checked><label for="c1-res-body">Body<small>empty</small></label>
+    <input type="radio" name="c1-res" id="c1-res-headers"><label for="c1-res-headers">Headers<small>1</small></label>
+    <input type="radio" name="c1-res" id="c1-res-info"><label for="c1-res-info">Info</label>
+    <div class="panel" id="panel-c1-res-body"><p class="empty">No body.</p></div>
+    <div class="panel" id="panel-c1-res-headers"><div class="scroll"><table>
+<tr><th>Location</th><td>/x</td></tr>
+</table></div></div>
+    <div class="panel" id="panel-c1-res-info"><div class="scroll"><table>
+<tr><th>Status</th><td>302 </td></tr>
+<tr><th>OK</th><td>no</td></tr>
+<tr><th>Duration</th><td>12 ms</td></tr>
+<tr><th>Content-Type</th><td>—</td></tr>
+<tr><th>Body size</th><td>—</td></tr>
+<tr><th>Final URL</th><td>https://host.test/x</td></tr>
+</table></div></div>
+  </div>
+</section>
+  </main>
+</div>
+</details>
+<details class="call" id="call-3" open>
+<summary>
+  <span class="seq">#3</span>
+  <span class="method get">GET</span>
+  <code class="path">/slow</code>
+  <span class="status s-error">✖ TimeoutError</span>
+  <span class="chip">⏱ 30001 ms</span>
+  
+</summary>
+<div class="call-body">
+  <div class="row"><code class="url">https://host.test/slow</code><span class="chip dim">2026-10-22T00:00:00.000Z</span></div>
+  <main class="grid">
+<section class="card ">
+  <h2>Request</h2>
+  <style>#c3-req-body:checked ~ #panel-c3-req-body{display:block}#c3-req-body:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c3-req-headers:checked ~ #panel-c3-req-headers{display:block}#c3-req-headers:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c3-req-params:checked ~ #panel-c3-req-params{display:block}#c3-req-params:checked + label{color:var(--accent);border-bottom-color:var(--accent)}#c3-req-options:checked ~ #panel-c3-req-options{display:block}#c3-req-options:checked + label{color:var(--accent);border-bottom-color:var(--accent)}</style>
+  <div class="tabs">
+    <input type="radio" name="c3-req" id="c3-req-body" checked><label for="c3-req-body">Body<small>empty</small></label>
+    <input type="radio" name="c3-req" id="c3-req-headers"><label for="c3-req-headers">Headers<small>0</small></label>
+    <input type="radio" name="c3-req" id="c3-req-params"><label for="c3-req-params">Params<small>0</small></label>
+    <input type="radio" name="c3-req" id="c3-req-options"><label for="c3-req-options">Options<small>0</small></label>
+    <div class="panel" id="panel-c3-req-body"><p class="empty">No body.</p></div>
+    <div class="panel" id="panel-c3-req-headers"><p class="empty">No request headers were set explicitly.</p></div>
+    <div class="panel" id="panel-c3-req-params"><p class="empty">No query parameters.</p></div>
+    <div class="panel" id="panel-c3-req-options"><p class="empty">Default request options.</p></div>
+  </div>
+</section>
+<section class="card s-error">
+  <h2>Response <span class="sub">none — the request failed before a response arrived</span></h2>
+  <div class="error">
+    <div class="error-name">TimeoutError</div>
+    <pre class="scroll">Request timed out after 30000ms
+  - token: ***</pre>
+  </div>
+</section>
+  </main>
+</div>
+</details>
+<footer>
+  <span>Masked values are shown as <code>***</code>. Headers are the ones the test set explicitly.</span>
+  
+  <span>Later calls are listed without bodies: the page reached API_REPORT_MAX_PAGE_BYTES.</span>
+</footer>
+</body>
+</html>

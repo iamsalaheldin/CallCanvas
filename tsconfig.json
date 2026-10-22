@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "callcanvas": ["src/index.ts"],
+      "callcanvas/fixtures": ["src/fixtures.ts"]
+    }
+  },
+  "include": ["src", "test", "examples", "playwright.config.ts"]
+}
