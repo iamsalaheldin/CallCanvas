@@ -5,7 +5,7 @@ All notable changes to CallCanvas (`callcanvas` on npm) are recorded here. The f
 
 ## [Unreleased]
 
-## [1.0.0] — Unreleased
+## [1.0.0] — 2026-10-22
 
 First public release of CallCanvas — visual API reporting for Playwright.
 
